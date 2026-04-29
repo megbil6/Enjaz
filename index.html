@@ -1,1 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>كتابي التفاعلي المجاني</title>
+    <style>
+        body { background-color: #333; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .canvas-container { box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        #canvas-holder { display: none; } /* إخفاء العناصر الأصلية */
+    </style>
+</head>
+<body>
 
+    <div id="book-container"></div>
+
+    <audio id="flip-sound" src="flip.mp3"></audio>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
+
+    <script>
+        const pdfUrl = 'book.pdf'; // تأكد أن الاسم مطابق لملفك
+        const flipSound = document.getElementById('flip-sound');
+
+        // 1. إعداد PDF.js لتحويل الصفحات
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+        async function renderPDF() {
+            const loadingTask = pdfjsLib.getDocument(pdfUrl);
+            const pdf = await loadingTask.promise;
+            const container = document.getElementById('book-container');
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 1.5 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                canvas.className = 'page';
+
+                await page.render({ canvasContext: context, viewport: viewport }).promise;
+                container.appendChild(canvas);
+            }
+
+            // 2. تشغيل تأثير التقليب بعد تحميل الصفحات
+            const pageFlip = new St.PageFlip(container, {
+                width: 550, // عرض الصفحة الواحدة
+                height: 733, // طول الصفحة
+                showCover: true,
+                mobileScrollSupport: false
+            });
+
+            pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+
+            // 3. إضافة صوت التقليب
+            pageFlip.on('flip', (e) => {
+                flipSound.currentTime = 0;
+                flipSound.play();
+            });
+        }
+
+        renderPDF();
+    </script>
+</body>
+</html>
