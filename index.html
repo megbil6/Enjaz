@@ -49,6 +49,10 @@
                 height: 733, // طول الصفحة
                 showCover: true,
                 mobileScrollSupport: false
+                startPage: 0,    // يبدأ من الصفحة الأولى (الغلاف)
+                drawShadow: true, // يعطي ظل في المنتصف يوحي بمكان "خياطة" الكتاب أو العمود الفقري
+                flippingTime: 1000, // سرعة التقليب (بالملي ثانية)
+              showPageCorners: true, 
             });
 
             pageFlip.loadFromHTML(document.querySelectorAll('.page'));
